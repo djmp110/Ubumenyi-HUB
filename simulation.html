@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>3D Simulation Studio | Ubumenyi Hub - Dynamic Skills Sandbox</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0f1c;
+            color: #eef4ff;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .main-header {
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            
+        }
+        .header-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60efff, #00b4ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-logo span { color: #f5b042; background: none; -webkit-background-clip: unset; background-clip: unset; }
+        .nav-links a {
+            color: #ccdeee;
+            text-decoration: none;
+            margin-left: 1.8rem;
+            font-weight: 500;
+            transition: 0.2s;
+            
+        }
+        .nav-links a:hover { color: #60efff; }
+
+        /* Main Layout */
+        .sim-container {
+            max-width: 1600px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* TABS (Top) - Categorized Tools */
+        .tabs-container {
+            background: rgba(20, 30, 45, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(96, 239, 255, 0.2);
+        }
+        .tabs-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(72, 187, 255, 0.3);
+            padding-bottom: 0.5rem;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #b4cdff;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn i { font-size: 1.1rem; }
+        .tab-btn.active {
+            background: #00b4ff22;
+            color: #60efff;
+            border-bottom: 2px solid #60efff;
+            border-radius: 30px 30px 0 0;
+        }
+        .tab-btn:hover { background: #2c3e55; color: white; }
+        .tab-content {
+            padding: 1rem 0.5rem;
+            display: none;
+            animation: fade 0.25s ease;
+        }
+        .tab-content.active-tab { display: block; }
+        .tools-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .tool-card-3d {
+            background: linear-gradient(145deg, #1e2a3a, #0f1722);
+            border-radius: 20px;
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid #2d4a6e;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .tool-card-3d:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: #60efff;
+            box-shadow: 0 10px 20px rgba(0,180,255,0.2);
+        }
+        .tool-icon { font-size: 1.4rem; }
+        .tool-info h4 { font-size: 0.9rem; font-weight: 700; }
+        .tool-info p { font-size: 0.7rem; opacity: 0.7; }
+        
+        /* 3D Simulation Canvas + Log area */
+        .simulation-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .canvas-3d-area {
+            background: #0a101c;
+            border-radius: 32px;
+            border: 1px solid #2d4f6e;
+            overflow: hidden;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        #canvas3d {
+            width: 100%;
+            height: 500px;
+            display: block;
+            background: radial-gradient(circle at center, #111a28, #05080f);
+        }
+        .sim-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f1825cc;
+            backdrop-filter: blur(8px);
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .action-group button {
+            background: #1e2f3e;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            margin: 0 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-group button:hover { background: #2c5a6e; transform: scale(0.97); }
+        .save-load-group button {
+            background: #0f2c3a;
+            border: 1px solid #60efff;
+        }
+        .log-panel {
+            background: #07111eaa;
+            border-radius: 24px;
+            padding: 12px 20px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            border-left: 4px solid #60efff;
+        }
+        .gallery-section {
+            margin-top: 2rem;
+            background: #0f1825cc;
+            border-radius: 32px;
+            padding: 1.2rem;
+        }
+        .gallery-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .gallery-item {
+            background: #172433;
+            border-radius: 20px;
+            padding: 12px;
+            width: 220px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #2f4b6e;
+        }
+        .gallery-item:hover { transform: translateY(-5px); border-color: #60efff; }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #7e95b0;
+            margin-top: 3rem;
+        }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 900px) { .tabs-header { justify-content: center; } .tool-card-3d { padding: 4px 12px; } }
+    </style>
+</head>
+<body>
+
+<div class="main-header">
+    <div class="header-container">
+        <div>
+            <div class="header-logo">UBUMENYI SIMULATION</div><span> </span></div>
+            <div style="font-size: 0.7rem;">Interactive Engineering · Real-time Physics · Skill Builder</div>
+        </div>
+        <div class="nav-links" style="text-align: right; margin-right: 80px;">
+            <a href="index.html">Home</a>
+            <a href="#">👤</a>
+        
+        </div>
+    </div>
+</div>
+
+<div class="sim-container">
+    <!-- TABS: categorized tool palettes -->
+    <div class="tabs-container">
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="physics"><i class="fas fa-atom"></i> Physics & Mechanics</button>
+            <button class="tab-btn" data-tab="electrical"><i class="fas fa-microchip"></i> Electrical & Electronics</button>
+            <button class="tab-btn" data-tab="civil"><i class="fas fa-drafting-compass"></i> Civil & Structural</button>
+            <button class="tab-btn" data-tab="chemical"><i class="fas fa-flask"></i> Chemical & Thermal</button>
+            <button class="tab-btn" data-tab="logic"><i class="fas fa-chart-line"></i> Data & Logic</button>
+        </div>
+        
+        <!-- Physics Tab -->
+        <div id="physics" class="tab-content active-tab">
+            <div class="tools-grid">
+                <div class="tool-card-3d" data-type="force" data-value="push_5N"><div class="tool-icon"><i class="fas fa-arrow-right"></i></div><div class="tool-info"><h4>Force Vector 5N →</h4><p>Apply directional push (X-axis)</p></div></div>
+                <div class="tool-card-3d" data-type="mass" data-value="mass_2kg"><div class="tool-icon"><i class="fas fa-weight-hanging"></i></div><div class="tool-info"><h4>Mass: 2kg</h4><p>Inertia & momentum</p></div></div>
+                <div class="tool-card-3d" data-type="gravity" data-value="gravity_on"><div class="tool-icon"><i class="fas fa-globe"></i></div><div class="tool-info"><h4>Gravity 9.81</h4><p>Downward acceleration</p></div></div>
+                <div class="tool-card-3d" data-type="bounce" data-value="bounce_0.8"><div class="tool-icon"><i class="fas fa-hand-peace"></i></div><div class="tool-info"><h4>Bounciness 0.8</h4><p>Elastic collision</p></div></div>
+                <div class="tool-card-3d" data-type="impulse" data-value="impulse_up"><div class="tool-icon"><i class="fas fa-rocket"></i></div><div class="tool-info"><h4>Impulse Upward</h4><p>Sudden force +Y</p></div></div>
+            </div>
+        </div>
+        <!-- Electrical Tab -->
+        <div id="electrical" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card-3d" data-type="electric" data-value="voltage_12v"><div class="tool-icon"><i class="fas fa-bolt"></i></div><div class="tool-info"><h4>Voltage 12V</h4><p>Potential difference</p></div></div>
+                <div class="tool-card-3d" data-type="electric" data-value="resistor_220"><div class="tool-icon"><i class="fas fa-charging-station"></i></div><div class="tool-info"><h4>Resistor 220Ω</h4><p>Current limiter</p></div></div>
+                <div class="tool-card-3d" data-type="electric" data-value="led_circuit"><div class="tool-icon"><i class="fas fa-lightbulb"></i></div><div class="tool-info"><h4>LED + Resistor</h4><p>Visual indicator</p></div></div>
+            </div>
+        </div>
+        <!-- Civil Tab -->
+        <div id="civil" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card-3d" data-type="structural" data-value="beam_support"><div class="tool-icon"><i class="fas fa-grip-lines"></i></div><div class="tool-info"><h4>Pinned Support</h4><p>Fixed rotation joint</p></div></div>
+                <div class="tool-card-3d" data-type="structural" data-value="pointload_5kn"><div class="tool-icon"><i class="fas fa-arrow-down"></i></div><div class="tool-info"><h4>Point Load 5kN</h4><p>Force at center</p></div></div>
+                <div class="tool-card-3d" data-type="structural" data-value="steel_truss"><div class="tool-icon"><i class="fas fa-cubes"></i></div><div class="tool-info"><h4>Steel Truss</h4><p>Triangulated frame</p></div></div>
+            </div>
+        </div>
+        <!-- Chemical Tab -->
+        <div id="chemical" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card-3d" data-type="thermal" data-value="temp_400k"><div class="tool-icon"><i class="fas fa-temperature-high"></i></div><div class="tool-info"><h4>Temp 400K</h4><p>Thermal energy</p></div></div>
+                <div class="tool-card-3d" data-type="thermal" data-value="pressure_200kpa"><div class="tool-icon"><i class="fas fa-tachometer-alt"></i></div><div class="tool-info"><h4>Pressure 200kPa</h4><p>Gas expansion</p></div></div>
+                <div class="tool-card-3d" data-type="thermal" data-value="reaction_rate"><div class="tool-icon"><i class="fas fa-vial"></i></div><div class="tool-info"><h4>Rate k=0.1</h4><p>Reaction kinetics</p></div></div>
+            </div>
+        </div>
+        <!-- Logic Tab -->
+        <div id="logic" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card-3d" data-type="control" data-value="pid_controller"><div class="tool-icon"><i class="fas fa-sliders-h"></i></div><div class="tool-info"><h4>PID Controller</h4><p>Feedback loop</p></div></div>
+                <div class="tool-card-3d" data-type="control" data-value="signal_sine"><div class="tool-icon"><i class="fas fa-waveform"></i></div><div class="tool-info"><h4>Sine Wave 2Hz</h4><p>Oscillation signal</p></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Simulation Canvas + Controls -->
+    <div class="simulation-workspace">
+        <div class="canvas-3d-area">
+            <canvas id="canvas3d"></canvas>
+        </div>
+        <div class="sim-controls">
+            <div class="action-group">
+                <button id="runSimBtn"><i class="fas fa-play"></i> Apply Physics</button>
+                <button id="resetSceneBtn"><i class="fas fa-undo-alt"></i> Reset Scene</button>
+                <button id="addSphereBtn"><i class="fas fa-cube"></i> Add Sphere</button>
+            </div>
+            <div class="save-load-group">
+                <button id="saveSimStateBtn"><i class="fas fa-save"></i> Save Simulation</button>
+                <button id="loadSimStateBtn"><i class="fas fa-folder-open"></i> Load Saved</button>
+            </div>
+        </div>
+        <div class="log-panel" id="logPanel">
+            <i class="fas fa-brain"></i> System Ready | Click any 3D Tool Card → instantly affects simulation (force, gravity, bounce). Watch objects move!
+        </div>
+    </div>
+
+    <!-- Gallery Section: community works -->
+    <div class="gallery-section">
+        <h3><i class="fas fa-users-viewfinder"></i> Community Simulations (3D Examples)</h3>
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Ubumenyi Hub — 3D Simulation Studio | Real-time physics | Save & resume your interactive engineering models.</p>
+</footer>
+
+<!-- Three.js Library -->
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+    
+    // --- Setup Scene, Camera, Renderer (3D immersive)---
+    const canvas = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050b14);
+    scene.fog = new THREE.FogExp2(0x050b14, 0.008);
+    
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    camera.position.set(8, 5, 12);
+    camera.lookAt(0, 2, 0);
+    
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.shadowMap.enabled = true;
+    
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = false;
+    controls.enableZoom = true;
+    
+    // --- Lighting ---
+    const ambientLight = new THREE.AmbientLight(0x404060);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(5, 10, 7);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+    const backLight = new THREE.PointLight(0x4466cc, 0.4);
+    backLight.position.set(-2, 3, -4);
+    scene.add(backLight);
+    const fillLight = new THREE.PointLight(0xffaa66, 0.3);
+    fillLight.position.set(3, 2, 4);
+    scene.add(fillLight);
+    
+    // Ground grid & helper
+    const gridHelper = new THREE.GridHelper(20, 20, 0x88aaff, 0x335588);
+    gridHelper.position.y = -0.5;
+    scene.add(gridHelper);
+    const planeMat = new THREE.MeshStandardMaterial({ color: 0x1a2a3a, roughness: 0.7, metalness: 0.1 });
+    const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(15, 12), planeMat);
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.position.y = -0.5;
+    groundPlane.receiveShadow = true;
+    scene.add(groundPlane);
+    
+    // --- Dynamic Objects Array (physics bodies)---
+    let dynamicBodies = []; // each: { mesh, velocity, mass, bounciness, type }
+    
+    // Core sphere (main interactive)
+    function createDefaultSphere() {
+        const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+        const material = new THREE.MeshStandardMaterial({ color: 0x60efff, metalness: 0.4, roughness: 0.2, emissive: 0x004466 });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.castShadow = true;
+        sphere.receiveShadow = true;
+        sphere.position.set(0, 2, 0);
+        scene.add(sphere);
+        return { mesh: sphere, velocity: new THREE.Vector3(0, 0, 0), mass: 1.0, bounciness: 0.6, type: 'sphere' };
+    }
+    
+    function addExtraSphere() {
+        const geometry = new THREE.SphereGeometry(0.55, 32, 32);
+        const material = new THREE.MeshStandardMaterial({ color: 0xff8844, metalness: 0.3 });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.castShadow = true;
+        sphere.position.set( (Math.random() - 0.5)*4, 3, (Math.random() - 0.5)*4 );
+        scene.add(sphere);
+        dynamicBodies.push({ mesh: sphere, velocity: new THREE.Vector3(0, 0, 0), mass: 0.8, bounciness: 0.5, type: 'sphere' });
+        updateLog(`🔮 Added new sphere! Total objects: ${dynamicBodies.length}`);
+    }
+    
+    // Initialize main sphere
+    let mainSphere = createDefaultSphere();
+    dynamicBodies.push(mainSphere);
+    
+    // Gravity vector (simulated)
+    let gravityEnabled = true;
+    const GRAVITY_FORCE = -9.8;
+    let appliedImpulse = new THREE.Vector3(0, 0, 0);
+    
+    // Tools effect mapping
+    function applyToolEffect(toolType, toolValue) {
+        switch(toolType) {
+            case 'force':
+                mainSphere.velocity.x += 3.5;
+                updateLog(`🚀 Applied Force 5N → sphere gains X-velocity: ${mainSphere.velocity.x.toFixed(2)} m/s`);
+                break;
+            case 'mass':
+                mainSphere.mass = 2.0;
+                updateLog(`⚖️ Mass set to 2kg → inertia increased`);
+                break;
+            case 'gravity':
+                gravityEnabled = true;
+                updateLog(`🌍 Gravity enabled: -9.8 m/s² simulated`);
+                break;
+            case 'bounce':
+                mainSphere.bounciness = 0.8;
+                updateLog(`🏀 Bounciness = 0.8 → more elastic collisions`);
+                break;
+            case 'impulse':
+                mainSphere.velocity.y += 5.0;
+                updateLog(`⬆️ Impulse upward! velocity Y = ${mainSphere.velocity.y.toFixed(2)}`);
+                break;
+            case 'electric':
+                if(toolValue === 'voltage_12v') updateLog(`⚡ Voltage 12V applied → imaginary circuit: current would be ${(12/ (220||100)).toFixed(2)}A if resistance present`);
+                else if(toolValue === 'resistor_220') updateLog(`🔌 Resistor 220Ω added: limits current flow.`);
+                else updateLog(`💡 LED Circuit glows! Visual feedback active`);
+                break;
+            case 'structural':
+                if(toolValue === 'pointload_5kn') updateLog(`🏗️ Structural load 5kN on beam → deflection simulated. Strength analysis ready`);
+                else updateLog(`📐 Structural component ${toolValue} added. Use with caution.`);
+                break;
+            case 'thermal':
+                if(toolValue === 'temp_400k') updateLog(`🔥 Temperature raised to 400K: particle motion increased.`);
+                else if(toolValue === 'pressure_200kpa') updateLog(`💨 Pressure 200kPa: volume expansion effect.`);
+                else updateLog(`🧪 Reaction rate constant k=0.1 → half-life simulation: ~6.93s`);
+                break;
+            case 'control':
+                if(toolValue === 'pid_controller') updateLog(`🎛️ PID Controller active: stabilizing output.`);
+                else updateLog(`📈 Sine wave 2Hz signal generated.`);
+                break;
+            default: updateLog(`🛠️ Tool applied: ${toolValue} (simulation interpreted)`);
+        }
+        // special effect: add floating particles for fun
+        if(toolValue.includes('force') || toolValue.includes('impulse')) {
+            const particles = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0xffaa55 }));
+            scene.add(particles);
+            setTimeout(() => scene.remove(particles), 300);
+        }
+    }
+    
+    // Update log panel
+    function updateLog(msg) {
+        const logDiv = document.getElementById('logPanel');
+        logDiv.innerHTML = `<i class="fas fa-waveform"></i> ${msg} <br><span style="font-size:0.7rem;">[3D Simulation] objects: ${dynamicBodies.length} | use tools to modify physics</span>`;
+    }
+    
+    // Physics update (simple euler)
+    let lastTime = performance.now();
+    function updatePhysics(deltaTime) {
+        if(deltaTime > 0.03) deltaTime = 0.03;
+        const dt = Math.min(deltaTime, 0.033);
+        for(let obj of dynamicBodies) {
+            if(gravityEnabled && obj.mass) {
+                obj.velocity.y += GRAVITY_FORCE * dt;
+            }
+            // apply temporary impulse (reset after one frame?)
+            if(appliedImpulse.length() > 0 && obj === mainSphere) {
+                obj.velocity.add(appliedImpulse);
+                appliedImpulse.set(0,0,0);
+            }
+            obj.mesh.position.x += obj.velocity.x * dt;
+            obj.mesh.position.y += obj.velocity.y * dt;
+            obj.mesh.position.z += obj.velocity.z * dt;
+            
+            // Ground collision Y = -0.5 + radius 0.7 => boundary
+            const radius = obj.mesh.geometry?.parameters?.radius || 0.7;
+            const groundY = -0.5 + radius;
+            if(obj.mesh.position.y < groundY) {
+                obj.mesh.position.y = groundY;
+                obj.velocity.y = -obj.velocity.y * obj.bounciness;
+                if(Math.abs(obj.velocity.y) < 0.3 && obj.velocity.y < 0) obj.velocity.y = 0;
+            }
+            // Boundaries X/Z
+            if(Math.abs(obj.mesh.position.x) > 6.5) {
+                obj.velocity.x *= -0.8;
+                obj.mesh.position.x = Math.sign(obj.mesh.position.x)*6.4;
+            }
+            if(Math.abs(obj.mesh.position.z) > 6) {
+                obj.velocity.z *= -0.7;
+                obj.mesh.position.z = Math.sign(obj.mesh.position.z)*5.9;
+            }
+            // small air drag
+            obj.velocity.multiplyScalar(0.995);
+        }
+    }
+    
+    // Reset whole simulation state
+    function resetSimulation() {
+        // clear extra bodies except main sphere
+        for(let i=dynamicBodies.length-1; i>=0; i--) {
+            if(dynamicBodies[i].type !== 'sphere' || dynamicBodies[i] !== mainSphere) {
+                scene.remove(dynamicBodies[i].mesh);
+                dynamicBodies.splice(i,1);
+            }
+        }
+        mainSphere.mesh.position.set(0, 2, 0);
+        mainSphere.velocity.set(0,0,0);
+        mainSphere.mass = 1.0;
+        mainSphere.bounciness = 0.6;
+        gravityEnabled = true;
+        updateLog(`🌀 Scene reset. Sphere at origin, gravity active, velocity zero.`);
+    }
+    
+    // Save current state to localStorage
+    function saveCurrentState() {
+        const state = {
+            pos: { x: mainSphere.mesh.position.x, y: mainSphere.mesh.position.y, z: mainSphere.mesh.position.z },
+            vel: { x: mainSphere.velocity.x, y: mainSphere.velocity.y, z: mainSphere.velocity.z },
+            mass: mainSphere.mass,
+            bounciness: mainSphere.bounciness,
+            gravity: gravityEnabled,
+            extraBodies: dynamicBodies.filter(b => b !== mainSphere).map(b => ({ pos: b.mesh.position, vel: b.velocity, mass: b.mass }))
+        };
+        localStorage.setItem('forge3d_simulation', JSON.stringify(state));
+        updateLog(`💾 Simulation saved! You can resume later.`);
+        // Also add to community gallery (as personal work)
+        addToCommunityGallery(state);
+    }
+    
+    function addToCommunityGallery(state) {
+        let gallery = JSON.parse(localStorage.getItem('sim_gallery_3d') || '[]');
+        const preview = `Sphere at (${state.pos.x.toFixed(1)}, ${state.pos.y.toFixed(1)}, ${state.pos.z.toFixed(1)}) | velY: ${state.vel.y.toFixed(1)} | bounce:${state.bounciness}`;
+        const newEntry = {
+            id: Date.now(),
+            title: `3D Sim - ${new Date().toLocaleTimeString()}`,
+            author: "You (shared)",
+            preview: preview,
+            stateData: state
+        };
+        gallery.unshift(newEntry);
+        if(gallery.length > 6) gallery.pop();
+        localStorage.setItem('sim_gallery_3d', JSON.stringify(gallery));
+        renderCommunityGallery();
+    }
+    
+    function loadSavedState() {
+        const saved = localStorage.getItem('forge3d_simulation');
+        if(saved) {
+            const s = JSON.parse(saved);
+            mainSphere.mesh.position.set(s.pos.x, s.pos.y, s.pos.z);
+            mainSphere.velocity.set(s.vel.x, s.vel.y, s.vel.z);
+            mainSphere.mass = s.mass;
+            mainSphere.bounciness = s.bounciness;
+            gravityEnabled = s.gravity;
+            // remove extras first
+            for(let i=dynamicBodies.length-1; i>=0; i--) if(dynamicBodies[i] !== mainSphere) { scene.remove(dynamicBodies[i].mesh); dynamicBodies.splice(i,1); }
+            if(s.extraBodies) {
+                s.extraBodies.forEach(ext => {
+                    const geom = new THREE.SphereGeometry(0.6, 24, 24);
+                    const mat = new THREE.MeshStandardMaterial({ color: 0x88aaff });
+                    const newSphere = new THREE.Mesh(geom, mat);
+                    newSphere.position.set(ext.pos.x, ext.pos.y, ext.pos.z);
+                    scene.add(newSphere);
+                    dynamicBodies.push({ mesh: newSphere, velocity: new THREE.Vector3(ext.vel.x, ext.vel.y, ext.vel.z), mass: ext.mass, bounciness: 0.6, type: 'sphere' });
+                });
+            }
+            updateLog(`📀 Loaded previous simulation. Restored all objects.`);
+        } else updateLog(`❌ No saved simulation found.`);
+    }
+    
+    // Gallery render from local community
+    function renderCommunityGallery() {
+        const galleryArr = JSON.parse(localStorage.getItem('sim_gallery_3d') || '[]');
+        const container = document.getElementById('galleryGrid');
+        container.innerHTML = '';
+        if(galleryArr.length === 0) {
+            // default examples (with motion behavior preview)
+            const examples = [
+                { title: "🔵 Bouncing Sphere High", preview: "Velocity Y = 6 m/s, gravity bounce", stateData: { pos: {x:0,y:2,z:0}, vel: {x:0,y:6,z:0}, mass:1, bounciness:0.85 } },
+                { title: "⚡ Force Field + Impulse", preview: "Sphere with side force + impulse", stateData: { pos: {x:0,y:1.5,z:0}, vel: {x:3.2,y:2,z:0}, mass:1, bounciness:0.7 } }
+            ];
+            examples.forEach((ex, idx) => {
+                const card = document.createElement('div');
+                card.className = 'gallery-item';
+                card.innerHTML = `<strong>${ex.title}</strong><br><span style="font-size:0.7rem;">${ex.preview}</span><br><i class="fas fa-download"></i> Load`;
+                card.onclick = () => {
+                    const s = ex.stateData;
+                    resetSimulation();
+                    mainSphere.mesh.position.set(s.pos.x, s.pos.y, s.pos.z);
+                    mainSphere.velocity.set(s.vel.x, s.vel.y, s.vel.z);
+                    mainSphere.bounciness = s.bounciness;
+                    updateLog(`✨ Loaded community example: ${ex.title}`);
+                };
+                container.appendChild(card);
+            });
+        } else {
+            galleryArr.forEach(work => {
+                const card = document.createElement('div');
+                card.className = 'gallery-item';
+                card.innerHTML = `<strong>${work.title}</strong><br><span style="font-size:0.7rem;">${work.preview.substring(0,50)}</span><br><i class="fas fa-copy"></i> Load Work`;
+                card.onclick = () => {
+                    const st = work.stateData;
+                    if(st) {
+                        resetSimulation();
+                        mainSphere.mesh.position.set(st.pos.x, st.pos.y, st.pos.z);
+                        mainSphere.velocity.set(st.vel.x, st.vel.y, st.vel.z);
+                        mainSphere.bounciness = st.bounciness;
+                        updateLog(`📂 Loaded community simulation: ${work.title}`);
+                    }
+                };
+                container.appendChild(card);
+            });
+        }
+    }
+    
+    // Event handlers for tools
+    document.querySelectorAll('.tool-card-3d').forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.getAttribute('data-type');
+            const val = card.getAttribute('data-value');
+            applyToolEffect(type, val);
+        });
+    });
+    
+    // UI buttons
+    document.getElementById('runSimBtn').addEventListener('click', () => updateLog(`▶️ Physics running! Objects react to gravity & collisions.`));
+    document.getElementById('resetSceneBtn').addEventListener('click', resetSimulation);
+    document.getElementById('addSphereBtn').addEventListener('click', addExtraSphere);
+    document.getElementById('saveSimStateBtn').addEventListener('click', saveCurrentState);
+    document.getElementById('loadSimStateBtn').addEventListener('click', loadSavedState);
+    
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            contents.forEach(c => c.classList.remove('active-tab'));
+            document.getElementById(tabId).classList.add('active-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+        });
+    });
+    
+    // Animation Loop
+    let previousTime = performance.now();
+    function animate() {
+        const now = performance.now();
+        let delta = Math.min(0.033, (now - previousTime) / 1000);
+        if(delta < 0.005) delta = 0.016;
+        previousTime = now;
+        updatePhysics(delta);
+        controls.update(); // update camera
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    animate();
+    
+    // resize handler
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+    }
+    onWindowResize();
+    
+    renderCommunityGallery();
+    updateLog(`🚀 3D Simulation Engine Active | Drag to orbit | Click tools to affect sphere | Add spheres & save | Community gallery loaded`);
+</script>
+</body>
+</html>

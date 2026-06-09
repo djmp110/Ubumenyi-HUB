@@ -1,0 +1,279 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+#wrap{width:100%;height:520px;position:relative;background:#03050f;border-radius:10px;overflow:hidden;font-family:'Courier New',monospace}
+canvas{display:block;width:100px;height:100px}
+#lbl{position:absolute;top:14px;left:50%;transform:translateX(-50%);color:rgba(180,220,255,0.8);font-size:12px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+#dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:background .3s}
+.dot.on{background:#3af}
+#barwrap{position:absolute;bottom:0;left:0;width:100%;height:3px;background:rgba(255,255,255,0.07)}
+#bar{height:3px;width:0%;background:linear-gradient(90deg,#3af,#4f8,#fa3);transition:width .1s linear}
+</style>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+  <div id="lbl">Scene 1 — Electron circuit</div>
+  <div id="dots">
+    <div class="dot on" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+  </div>
+  <div id="barwrap"><div id="bar"></div></div>
+</div>
+<script>
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+const wrap=document.getElementById('wrap');
+const barEl=document.getElementById('bar');
+const lblEl=document.getElementById('lbl');
+const dots=[document.getElementById('d0'),document.getElementById('d1'),document.getElementById('d2')];
+const LABELS=['Scene 1 — Electron circuit','Scene 2 — Chemical bond (H₂O)','Scene 3 — Mineral to product'];
+
+// Each scene runs for this many frames at ~60fps
+const DUR=[480, 480, 540];
+const TOTAL=DUR[0]+DUR[1]+DUR[2]; // 1500
+
+let W,H,frame=0,prevScene=-1;
+
+function resize(){W=cv.width=wrap.clientWidth;H=cv.height=wrap.clientHeight;}
+resize();
+window.addEventListener('resize',resize);
+
+// ─── SCENE ROUTING ──────────────────────────────────────
+function getScene(f){
+  const g=f%TOTAL;
+  if(g<DUR[0]) return {sc:0, ft:g};
+  if(g<DUR[0]+DUR[1]) return {sc:1, ft:g-DUR[0]};
+  return {sc:2, ft:g-DUR[0]-DUR[1]};
+}
+
+// ─── CIRCUIT ────────────────────────────────────────────
+const WP=[
+  {x:.12,y:.35},{x:.45,y:.35},{x:.45,y:.2},{x:.55,y:.2},{x:.55,y:.35},
+  {x:.88,y:.35},{x:.88,y:.65},{x:.55,y:.65},{x:.55,y:.8},{x:.45,y:.8},
+  {x:.45,y:.65},{x:.12,y:.65},{x:.12,y:.35}
+];
+function wp(p){return{x:p.x*W,y:p.y*H}}
+function wireLen(){let l=0;for(let i=1;i<WP.length;i++){const a=wp(WP[i-1]),b=wp(WP[i]);l+=Math.hypot(b.x-a.x,b.y-a.y);}return l;}
+function onWire(frac){
+  let rem=((frac%1)+1)%1*wireLen();
+  for(let i=1;i<WP.length;i++){
+    const a=wp(WP[i-1]),b=wp(WP[i]),seg=Math.hypot(b.x-a.x,b.y-a.y);
+    if(rem<=seg){const r=rem/seg;return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}
+    rem-=seg;
+  }
+  return wp(WP[WP.length-1]);
+}
+function drawCircuit(ft){
+  const g=ctx.createRadialGradient(W*.5,H*.45,20,W*.5,H*.45,W*.5);
+  g.addColorStop(0,'rgba(10,40,100,0.4)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+  ctx.beginPath();WP.forEach((p,i)=>{const{x,y}=wp(p);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.strokeStyle='rgba(30,110,255,0.15)';ctx.lineWidth=14;ctx.lineJoin='round';ctx.stroke();
+  ctx.strokeStyle='rgba(60,150,255,0.55)';ctx.lineWidth=3;ctx.stroke();
+
+  const bx=wp({x:.12,y:.5});
+  ctx.fillStyle='rgba(20,60,150,0.4)';ctx.strokeStyle='rgba(80,160,255,0.85)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(bx.x-18,bx.y-34,36,68,5);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#6cf';ctx.font=`bold ${H*.055}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚡',bx.x,bx.y);ctx.textBaseline='alphabetic';
+
+  const flk=0.65+0.35*Math.sin(ft*.25);
+  const lx=wp({x:.5,y:.2});
+  const lg=ctx.createRadialGradient(lx.x,lx.y,2,lx.x,lx.y,H*.12);
+  lg.addColorStop(0,`rgba(255,240,80,${flk*.8})`);lg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=lg;ctx.beginPath();ctx.arc(lx.x,lx.y,H*.12,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=`rgba(255,220,60,${flk*.9})`;ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(lx.x,lx.y,H*.065,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=`rgba(255,245,120,${flk})`;ctx.font=`${H*.065}px serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💡',lx.x,lx.y);ctx.textBaseline='alphabetic';
+
+  const rx=wp({x:.5,y:.8});
+  ctx.fillStyle='rgba(70,30,150,0.35)';ctx.strokeStyle='rgba(160,100,255,0.85)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(rx.x-35,rx.y-15,70,30,4);ctx.fill();ctx.stroke();
+  ctx.fillStyle='rgba(200,160,255,0.95)';ctx.font=`bold ${H*.028}px Courier New`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Ω  100Ω',rx.x,rx.y);ctx.textBaseline='alphabetic';
+
+  for(let i=0;i<10;i++){
+    const f=(ft*.0014+i*.1)%1;
+    const p=onWire(f),p2=onWire(f-.018);
+    const tg=ctx.createLinearGradient(p2.x,p2.y,p.x,p.y);
+    tg.addColorStop(0,'rgba(0,200,255,0)');tg.addColorStop(1,'rgba(0,220,255,0.9)');
+    ctx.beginPath();ctx.moveTo(p2.x,p2.y);ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle=tg;ctx.lineWidth=2;ctx.stroke();
+    const eg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,7);
+    eg.addColorStop(0,'#fff');eg.addColorStop(0.4,'#0ff');eg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle=eg;ctx.fill();
+    if(i%3===0){ctx.fillStyle='rgba(100,230,255,0.9)';ctx.font=`bold ${H*.018}px Courier New`;ctx.textAlign='center';ctx.fillText('e⁻',p.x,p.y-12);}
+  }
+}
+
+// ─── CHEMICAL BOND ──────────────────────────────────────
+function drawChem(ft){
+  // Background
+  const g=ctx.createRadialGradient(W*.5,H*.5,10,W*.5,H*.5,W*.55);
+  g.addColorStop(0,'rgba(0,60,30,0.4)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+  // ft goes 0→479; atoms close in during first 300 frames then stay bonded
+  const prog=Math.min(ft/300,1);
+  const gap=W*(0.28-prog*0.22); // from W*.28 down to W*.06
+  const cx=W*.5, cy=H*.46;
+
+  function atom(ax,ay,r,sym,col,shells){
+    const ag=ctx.createRadialGradient(ax,ay,2,ax,ay,r);
+    ag.addColorStop(0,col+'ee');ag.addColorStop(0.6,col+'55');ag.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(ax,ay,r,0,Math.PI*2);ctx.fillStyle=ag;ctx.fill();
+    ctx.beginPath();ctx.arc(ax,ay,r,0,Math.PI*2);ctx.strokeStyle=col+'bb';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=`bold ${r*.65}px Courier New`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sym,ax,ay);ctx.textBaseline='alphabetic';
+    shells.forEach((cnt,si)=>{
+      const sr=r+H*.055+si*H*.06;
+      ctx.beginPath();ctx.arc(ax,ay,sr,0,Math.PI*2);
+      ctx.strokeStyle=col+'22';ctx.lineWidth=0.8;ctx.stroke();
+      for(let ei=0;ei<cnt;ei++){
+        const ang=ft*.04*(si%2?-1:1)+ei*(Math.PI*2/cnt);
+        const ex=ax+Math.cos(ang)*sr,ey=ay+Math.sin(ang)*sr;
+        const eg=ctx.createRadialGradient(ex,ey,0,ex,ey,5);
+        eg.addColorStop(0,'#fff');eg.addColorStop(0.5,col);eg.addColorStop(1,'transparent');
+        ctx.beginPath();ctx.arc(ex,ey,5,0,Math.PI*2);ctx.fillStyle=eg;ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font=`bold ${H*.016}px Courier New`;
+        ctx.textAlign='center';ctx.fillText('e⁻',ex,ey-9);
+      }
+    });
+  }
+
+  // bond line when close
+  if(gap<W*.1){
+    const alpha=(1-gap/(W*.1));
+    ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(cx-gap*.5,cy);ctx.lineTo(cx+gap*.5,cy);
+    ctx.strokeStyle=`rgba(80,255,140,${alpha*.9})`;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.setLineDash([]);
+    const pulse=0.5+0.5*Math.sin(ft*.18);
+    const seg=ctx.createRadialGradient(cx,cy,0,cx,cy,12+pulse*4);
+    seg.addColorStop(0,'#fff');seg.addColorStop(0.5,'rgba(60,255,120,0.8)');seg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(cx,cy,12+pulse*4,0,Math.PI*2);ctx.fillStyle=seg;ctx.fill();
+    ctx.fillStyle='rgba(100,255,150,0.95)';ctx.font=`bold ${H*.019}px Courier New`;
+    ctx.textAlign='center';ctx.fillText('shared e⁻',cx,cy-18);
+  }
+
+  atom(cx-gap,cy,H*.078,'H','#4af',[1]);
+  atom(cx-gap-H*.24,cy,H*.078,'H','#4af',[1]);
+  atom(cx+gap,cy,H*.1,'O','#f84',[2,4]);
+
+  // caption
+  ctx.fillStyle=gap<W*.08?'rgba(100,255,160,0.9)':'rgba(160,210,255,0.7)';
+  ctx.font=`${H*.028}px Courier New`;ctx.textAlign='center';
+  ctx.fillText(
+    gap<W*.08?'2H + O  →  H₂O  (covalent bond formed)':'Atoms approaching — electrons forming bond…',
+    W*.5, H*.86
+  );
+}
+
+// ─── MINERAL → PRODUCT ──────────────────────────────────
+const S3=[
+  {id:'ore',   lbl:['Iron ore','(Fe₂O₃)'],  col:'#c84020'},
+  {id:'furnace',lbl:['Blast','furnace'],     col:'#ff6020'},
+  {id:'molten', lbl:['Molten','iron'],       col:'#ffaa00'},
+  {id:'steel',  lbl:['Steel','sheet'],       col:'#6090ff'},
+  {id:'product',lbl:['Finished','product'],  col:'#40ee80'},
+];
+function drawIndustry(ft){
+  const g=ctx.createRadialGradient(W*.5,H*.5,10,W*.6,H*.5,W*.6);
+  g.addColorStop(0,'rgba(60,20,0,0.35)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const n=S3.length;
+  const prog=(ft%540)/540*n;
+  S3.forEach((s,i)=>{
+    const bx=W*(0.1+i*.2),by=H*.46;
+    const dist=Math.abs(i-prog);
+    const scale=dist<0.8?1+0.28*(1-dist/.8):1;
+    const alpha=Math.max(0.22,1-dist*.28);
+    const r=Math.min(W*.065,H*.1);
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(bx,by);ctx.scale(scale,scale);
+    const c=s.col;
+    const hg=ctx.createRadialGradient(0,0,4,0,0,r*1.5);
+    hg.addColorStop(0,c+'99');hg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.arc(0,0,r*1.5,0,Math.PI*2);ctx.fill();
+    if(s.id==='ore'){
+      ctx.beginPath();
+      [[0,-r],[r*.7,-r*.5],[r,r*.2],[r*.5,r*.8],[-r*.4,r],[-r*.8,r*.5],[-r,-.2],[-r*.5,-r*.7]]
+        .forEach(([x,y],k)=>k?ctx.lineTo(x,y):ctx.moveTo(x,y));
+      ctx.closePath();ctx.fillStyle=c+'aa';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2;ctx.stroke();
+    } else if(s.id==='furnace'){
+      ctx.beginPath();ctx.moveTo(-r*.6,-r);ctx.lineTo(r*.6,-r);ctx.lineTo(r*.8,r);ctx.lineTo(-r*.8,r);ctx.closePath();
+      ctx.fillStyle=c+'77';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2;ctx.stroke();
+      for(let f=0;f<6;f++){
+        const fx=(f-2.5)*r*.28,flk=ft*.15+f*1.1;
+        ctx.beginPath();ctx.moveTo(fx,r*.15);
+        ctx.quadraticCurveTo(fx+Math.sin(flk)*r*.2,-r*.35+Math.cos(flk)*r*.15,fx,-r*.95);
+        ctx.strokeStyle=`rgba(255,${100+f*22},0,0.85)`;ctx.lineWidth=2.5;ctx.stroke();
+      }
+    } else if(s.id==='molten'){
+      ctx.beginPath();ctx.ellipse(0,0,r*.9,r*.48,0,0,Math.PI*2);
+      ctx.fillStyle=c+'bb';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2;ctx.stroke();
+      for(let rp=0;rp<3;rp++){
+        const rph=((ft*.05)+rp/3)%1;
+        ctx.beginPath();ctx.ellipse(0,0,r*.9*rph,r*.48*rph,0,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(255,200,0,${.7*(1-rph)})`;ctx.lineWidth=1.5;ctx.stroke();
+      }
+      for(let e=0;e<4;e++){
+        const ang=ft*.05+e*Math.PI/2;
+        const ex=Math.cos(ang)*r*.5,ey=Math.sin(ang)*r*.28;
+        ctx.fillStyle='rgba(255,230,80,0.9)';ctx.font=`bold ${H*.016}px Courier New`;
+        ctx.textAlign='center';ctx.fillText('e⁻',ex,ey);
+      }
+    } else if(s.id==='steel'){
+      ctx.fillStyle=c+'66';ctx.fillRect(-r,-r*.35,r*2,r*.7);
+      ctx.strokeStyle=c;ctx.lineWidth=2;ctx.strokeRect(-r,-r*.35,r*2,r*.7);
+      for(let l=0;l<4;l++){
+        ctx.beginPath();ctx.moveTo(-r+l*r*.55,-r*.35);ctx.lineTo(-r+l*r*.55,r*.35);
+        ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1;ctx.stroke();
+      }
+    } else {
+      for(let t2=0;t2<8;t2++){
+        const ang=t2*Math.PI/4+ft*.025;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(ang)*r*.55,Math.sin(ang)*r*.55);
+        ctx.lineTo(Math.cos(ang+.22)*r*.95,Math.sin(ang+.22)*r*.95);
+        ctx.lineTo(Math.cos(ang+.58)*r*.95,Math.sin(ang+.58)*r*.95);
+        ctx.lineTo(Math.cos(ang+.8)*r*.55,Math.sin(ang+.8)*r*.55);
+        ctx.closePath();ctx.fillStyle=c+'88';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.stroke();
+      }
+      ctx.beginPath();ctx.arc(0,0,r*.38,0,Math.PI*2);ctx.fillStyle=c+'cc';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2;ctx.stroke();
+    }
+    ctx.restore();
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.fillStyle=s.col;ctx.font=`${H*.026}px Courier New`;ctx.textAlign='center';
+    s.lbl.forEach((ln,li)=>ctx.fillText(ln,bx,by+r*scale+H*.075+li*H*.032));
+    ctx.restore();
+    if(i<n-1){
+      ctx.save();ctx.globalAlpha=.4;ctx.fillStyle='#aaa';
+      ctx.font=`${H*.04}px Courier New`;ctx.textAlign='center';
+      ctx.fillText('→',bx+W*.1,by+H*.02);ctx.restore();
+    }
+  });
+  ctx.fillStyle='rgba(180,200,255,0.6)';ctx.font=`${H*.025}px Courier New`;
+  ctx.textAlign='center';ctx.fillText('Electrons drive every industrial transformation',W*.5,H*.88);
+}
+
+// ─── MAIN LOOP ───────────────────────────────────────────
+function loop(){
+  requestAnimationFrame(loop);
+  frame++;
+  const {sc,ft}=getScene(frame);
+  if(sc!==prevScene){
+    prevScene=sc;
+    lblEl.textContent=LABELS[sc];
+    dots.forEach((d,i)=>d.classList.toggle('on',i===sc));
+  }
+  barEl.style.width=((frame%TOTAL)/TOTAL*100)+'%';
+  ctx.clearRect(0,0,W,H);
+  if(sc===0) drawCircuit(ft);
+  else if(sc===1) drawChem(ft);
+  else drawIndustry(ft);
+}
+loop();
+</script>
