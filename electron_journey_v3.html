@@ -1,4 +1,7 @@
-
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 #wrap{width:100%;height:520px;position:relative;background:#03050f;border-radius:10px;overflow:hidden;font-family:'Courier New',monospace}
@@ -10,6 +13,8 @@ canvas{display:block;width:100px;height:100px}
 #barwrap{position:absolute;bottom:0;left:0;width:100%;height:3px;background:rgba(255,255,255,0.07)}
 #bar{height:3px;width:0%;background:linear-gradient(90deg,#3af,#4f8,#fa3);transition:width .1s linear}
 </style>
+  </head>
+  <body>
 <div id="wrap">
   <canvas id="cv"></canvas>
   <div id="lbl">Scene 1 — Electron circuit</div>
@@ -277,3 +282,5 @@ function loop(){
 }
 loop();
 </script>
+  </body>
+</html>
