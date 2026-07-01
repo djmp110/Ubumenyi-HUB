@@ -1,0 +1,36 @@
+body {
+            display: flex;
+            flex-wrap: wrap;           /* allow cards to wrap to next line */
+            justify-content: center;
+            align-items: flex-start;    /* align to top */
+            height: 100vh;
+            margin: 0;
+            background: #111;
+            gap: 30px;                 /* INCREASED space between cards */
+            padding: 30px;             /* padding around the container */
+            box-sizing: border-box;
+        }
+
+        .card {
+            box-shadow: 0 8px 16px rgba(159, 241, 131, 0.3);
+            width: 320px;              /* slightly smaller for better spacing */
+            min-height: 200px;         /* minimum height for consistency */
+            background-image: url('/image/rwa.jpeg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            padding: 25px;             /* more internal padding */
+            text-align: center;
+            color: rgb(249, 251, 250);
+            margin: 10px;              /* ADDED margin for extra spacing */
+            transition: transform 0.3s ease; /* smooth hover effect */
+        }
+
+        .card:hover {
+            transform: scale(1.05);    /* hover effect for better UX */
+        }
+
+        /* Optional: Add a subtle border for better card definition */
+        .card {
+            border: 1px solid rgba(159, 241, 131, 0.2);
+        }
