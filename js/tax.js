@@ -1,10 +1,11 @@
-var tax = 0.23;
+
         var netsalary;
         
         for(var i = 0; i < 10; i++) {
             // Get user input
             var workername = prompt("Enter your name ");
             var job = prompt("Enter your job");
+            var tax = prompt("Enter tax rate ");
             var grossSalary = parseFloat(prompt("Enter your salary: "));
             
             // Create a new card div
