@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Tax Table</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background-image: url('/image/rwa.jpeg');
+            background-size: cover;
+            color:white;
+            display:flex;
+            justify-content:center;
+            padding-top:30px;
+        }
+
+        table{
+            border-collapse:collapse;
+            width:800px;
+            background:white;
+            color:black;
+        }
+
+        th,td{
+            border:1px solid black;
+            padding:10px;
+            text-align:center;
+        }
+
+        th{
+            background:#4CAF50;
+            color:white;
+        }
+        .taxcard {
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(159, 241, 131, 0.3);
+            
+        }
+    </style>
+</head>
+<body>
+<div class="taxcard">
+<table>
+    <thead>
+        <tr>
+            <th>Employee No</th>
+            <th>Name</th>
+            <th>Job</th>
+            <th>Gross Salary</th>
+            <th>Tax</th>
+            <th>Net Salary</th>
+        </tr>
+    </thead>
+    <tbody id="tax"></tbody>
+</table>
+</div>
+
+<script>
+    var tax = 0.23;
+    var tbody = document.getElementById("tax");
+    var rows = "";
+
+    for (var i = 0; i < 10; i++) {
+
+        var workername = prompt("Enter employee name:");
+        var job = prompt("Enter employee job:");
+        var grossSalary = parseFloat(prompt("Enter employee salary:"));
+
+        var taxallow;
+        var netsalary;
+
+        if (grossSalary < 70000) {
+            taxallow = "No";
+            netsalary = grossSalary;
+        } else {
+            taxallow = "Yes";
+            netsalary = grossSalary - (grossSalary * tax);
+        }
+
+        rows += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${workername}</td>
+                <td>${job}</td>
+                <td>${grossSalary.toFixed(2)} Rwf</td>
+                <td>${taxallow}</td>
+                <td>${netsalary.toFixed(2)} Rwf</td>
+            </tr>
+        `;
+    }
+
+    tbody.innerHTML = rows;
+</script>
+
+</body>
+</html>

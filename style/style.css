@@ -622,3 +622,8 @@ a[href="library.html"] {
     color: inherit;
     display: block;
 }
+.taxresult {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
