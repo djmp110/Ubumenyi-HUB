@@ -1,8 +1,9 @@
  var tax = 0.23;
     var tbody = document.getElementById("tax");
     var rows = "";
+    var numemlpoyee = prompt("Enter number of employee")
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < numemlpoyee; i++) {
 
         var workername = prompt("Enter employee name:");
         var job = prompt("Enter employee job:");

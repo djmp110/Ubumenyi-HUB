@@ -1,7 +1,8 @@
 
         var netsalary;
+        var numemlpoyee = prompt("Enter number of employee");
         
-        for(var i = 0; i < 10; i++) {
+        for(var i = 0; i < numemlpoyee; i++) {
             // Get user input
             var workername = prompt("Enter your name ");
             var job = prompt("Enter your job");
