@@ -30,5 +30,6 @@
                 <td>${netsalary.toFixed(2)} Rwf</td>
             </tr>
         `;
-        tbody = rows;
+        
     }
+    tbody.innerHTML = rows;
