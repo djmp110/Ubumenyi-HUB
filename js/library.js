@@ -1,0 +1,329 @@
+// ---------- STORAGE KEYS ----------
+    const STORAGE_BOOKS = 'ubumenyi_books';
+    const STORAGE_NOTES = 'ubumenyi_notes';
+    const STORAGE_PROGRESS = 'ubumenyi_progress';   // { bookId: currentPageIndex or textPosition, we store last read text offset (simple simulation)
+    const STORAGE_STATUS = 'ubumenyi_status';       // { bookId: 'reading' or 'finished' }
+
+    // ---------- DEFAULT BOOKS (preloaded inspiring books) ----------
+    const defaultBooks = [
+        { id: 'bk1', title: 'The Wealth of Africa', author: 'M. Nkurunziza', content: 'Chapter 1: The hidden treasures of the continent...\n\nEconomic transformation through digital skills. Rwanda’s leapfrog in technology shows that knowledge is the biggest currency. Ubumenyi Hub embodies that spirit.\n\nChapter 2: Community-led progress...' },
+        { id: 'bk2', title: 'Digital Mindset', author: 'E. Kagame', content: 'Introduction: In the 21st century, adaptability defines success. Coding, cloud, and collaboration. \n\nLesson 1: Why continuous learning matters. \nLesson 2: Micro-credentials and verifiable skills.\n\nFinal thoughts: Build, share, innovate.' },
+        { id: 'bk3', title: 'Ubumenyi & Innovation', author: 'A. Uwimana', content: 'Part I: The power of traditional knowledge meets modern AI. \nPart II: Every Rwandan can become a changemaker.\n\nInteractive exercises: think of one problem in your community and write a solution.' }
+    ];
+
+    // Helper: load data from localStorage or init
+    let books = [];
+    let notesMap = {};    // bookId -> noteText
+    let progressMap = {}; // bookId -> lastReadPosition (index of character offset or simple numeric, we use integer offset for content scroll simulation)
+    let statusMap = {};   // bookId -> 'reading' / 'finished'
+
+    function initData() {
+        const storedBooks = localStorage.getItem(STORAGE_BOOKS);
+        if (storedBooks) {
+            books = JSON.parse(storedBooks);
+        } else {
+            books = [...defaultBooks];
+            saveBooks();
+        }
+
+        const storedNotes = localStorage.getItem(STORAGE_NOTES);
+        if (storedNotes) {
+            notesMap = JSON.parse(storedNotes);
+        } else {
+            notesMap = {};
+        }
+
+        const storedProgress = localStorage.getItem(STORAGE_PROGRESS);
+        if (storedProgress) {
+            progressMap = JSON.parse(storedProgress);
+        } else {
+            progressMap = {};
+        }
+
+        const storedStatus = localStorage.getItem(STORAGE_STATUS);
+        if (storedStatus) {
+            statusMap = JSON.parse(storedStatus);
+        } else {
+            // set default statuses for default books
+            defaultBooks.forEach(b => {
+                if (!statusMap[b.id]) statusMap[b.id] = 'reading';
+            });
+            saveStatus();
+        }
+        // ensure every book has at least status reading if not present
+        books.forEach(book => {
+            if (!statusMap[book.id]) statusMap[book.id] = 'reading';
+        });
+        saveStatus();
+    }
+
+    function saveBooks() { localStorage.setItem(STORAGE_BOOKS, JSON.stringify(books)); }
+    function saveNotes() { localStorage.setItem(STORAGE_NOTES, JSON.stringify(notesMap)); }
+    function saveProgress() { localStorage.setItem(STORAGE_PROGRESS, JSON.stringify(progressMap)); }
+    function saveStatus() { localStorage.setItem(STORAGE_STATUS, JSON.stringify(statusMap)); }
+
+    // helper to update UI fully
+    let activeBookId = null;
+
+    function renderLibraryAndShelves() {
+        // render left library list
+        const container = document.getElementById('bookLibraryContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        books.forEach(book => {
+            const status = statusMap[book.id] || 'reading';
+            const statusText = status === 'reading' ? '📖 Reading' : '✅ Finished';
+            const statusClass = status === 'reading' ? 'status-reading' : 'status-finished';
+            const div = document.createElement('div');
+            div.className = 'book-item';
+            div.setAttribute('data-id', book.id);
+            div.innerHTML = `
+                <div style="flex:1">
+                    <div class="book-info">📕 ${escapeHtml(book.title)}</div>
+                    <div class="book-author">${escapeHtml(book.author || 'unknown author')}</div>
+                </div>
+                <div>
+                    <span class="book-status ${statusClass}">${statusText}</span>
+                    <button class="btn-sm" data-toggle-status="${book.id}" title="mark as finished/reading">🔄</button>
+                </div>
+            `;
+            div.addEventListener('click', (e) => {
+                // if click on toggle button, don't open reader directly
+                if (e.target.classList.contains('btn-sm') || e.target.getAttribute('data-toggle-status')) {
+                    e.stopPropagation();
+                    toggleBookStatus(book.id);
+                    return;
+                }
+                openReader(book.id);
+            });
+            container.appendChild(div);
+        });
+
+        // render "Currently Reading & Finished" shelves
+        const shelfDiv = document.getElementById('statusShelves');
+        shelfDiv.innerHTML = '';
+        const readingBooks = books.filter(b => (statusMap[b.id] || 'reading') === 'reading');
+        const finishedBooks = books.filter(b => (statusMap[b.id]) === 'finished');
+        
+        const readingHtml = `<div style="margin-bottom: 1rem;"><strong>📚 Currently reading (${readingBooks.length})</strong><div style="margin-top: 8px;">${readingBooks.map(b => `<div style="background:#fff1e0; border-radius:16px; padding:8px 12px; margin-bottom:6px;">📘 ${escapeHtml(b.title)} <span style="font-size:12px;">${escapeHtml(b.author)}</span></div>`).join('') || '<i style="color:#8e9e97;">— no active books —</i>'}</div></div>`;
+        const finishedHtml = `<div><strong>✅ Finished (${finishedBooks.length})</strong><div style="margin-top: 8px;">${finishedBooks.map(b => `<div style="background:#e3f0ea; border-radius:16px; padding:8px 12px; margin-bottom:6px;">🏁 ${escapeHtml(b.title)}</div>`).join('') || '<i style="color:#8e9e97;">— none yet —</i>'}</div></div>`;
+        shelfDiv.innerHTML = readingHtml + finishedHtml;
+    }
+
+    function toggleBookStatus(bookId) {
+        const current = statusMap[bookId] || 'reading';
+        if (current === 'reading') {
+            statusMap[bookId] = 'finished';
+        } else {
+            statusMap[bookId] = 'reading';
+        }
+        saveStatus();
+        renderLibraryAndShelves();
+        // if currently opened book is same, refresh reader view
+        if (activeBookId === bookId) {
+            openReader(bookId);
+        }
+    }
+
+    function openReader(bookId) {
+        activeBookId = bookId;
+        const book = books.find(b => b.id === bookId);
+        if (!book) return;
+
+        const savedNote = notesMap[bookId] || '';
+        const savedProgressOffset = progressMap[bookId] || 0;
+        // content preview with limited length but we'll show full content & scroll simulated
+        const fullContent = book.content || "No content available for this book. You can edit later or enjoy the lesson.";
+        
+        // display reader area
+        const readerPanel = document.getElementById('readerPanel');
+        const statusText = statusMap[bookId] === 'finished' ? '✅ Finished' : '📖 Reading in progress';
+        readerPanel.innerHTML = `
+            <div class="book-title-large">${escapeHtml(book.title)}</div>
+            <div style="color:#5b6e66; margin-bottom: 0.8rem;">${escapeHtml(book.author || 'Anonymous')} · ${statusText}</div>
+            <div class="progress-badge">📌 Last read position saved (auto)</div>
+            <div id="bookContentDisplay" class="book-content" style="white-space: pre-wrap;">${escapeHtml(fullContent)}</div>
+            <div class="notes-section">
+                <div class="notes-label">
+                    ✍️ Personal Notes & Important Lessons
+                    <span style="font-size:12px;">(auto-save when you click save)</span>
+                </div>
+                <textarea id="bookNotesArea" class="notes-textarea" rows="5" placeholder="Write down key insights, questions, or memorable quotes...">${escapeHtml(savedNote)}</textarea>
+                <button id="saveNotesBtn" class="save-note-btn">💾 Save Notes for this Book</button>
+                <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items:center;">
+                    <div>
+                        <button id="markReadingBtn" class="btn-action">📖 Mark as Reading</button>
+                        <button id="markFinishedBtn" class="btn-action">🏆 Mark as Finished</button>
+                    </div>
+                    <button id="resetProgressBtn" style="background:#f1ded0;">↺ Reset reading position</button>
+                </div>
+            </div>
+        `;
+        
+        // scroll to saved offset (simulate last reading spot) we store integer offset from content length
+        const contentDiv = document.getElementById('bookContentDisplay');
+        if (contentDiv && savedProgressOffset > 0 && savedProgressOffset < fullContent.length) {
+            // wrap in next tick
+            setTimeout(() => {
+                // find approximate line or scroll to offset? just a visual: we set scrollTop based on text estimation
+                const scrollable = contentDiv;
+                const totalChars = fullContent.length;
+                const ratio = savedProgressOffset / totalChars;
+                const maxScroll = scrollable.scrollHeight - scrollable.clientHeight;
+                scrollable.scrollTop = ratio * maxScroll;
+            }, 50);
+        }
+
+        // attach notes saving
+        const saveNoteBtn = document.getElementById('saveNotesBtn');
+        const notesArea = document.getElementById('bookNotesArea');
+        if (saveNoteBtn) {
+            saveNoteBtn.addEventListener('click', () => {
+                const newNote = notesArea.value;
+                notesMap[bookId] = newNote;
+                saveNotes();
+                alert('📘 Your notes have been saved! Come back anytime.');
+                renderLibraryAndShelves(); // just visual refresh
+            });
+        }
+
+        // mark as reading/finished
+        const markReading = document.getElementById('markReadingBtn');
+        const markFinished = document.getElementById('markFinishedBtn');
+        if (markReading) {
+            markReading.addEventListener('click', () => {
+                statusMap[bookId] = 'reading';
+                saveStatus();
+                renderLibraryAndShelves();
+                openReader(bookId);
+            });
+        }
+        if (markFinished) {
+            markFinished.addEventListener('click', () => {
+                statusMap[bookId] = 'finished';
+                saveStatus();
+                renderLibraryAndShelves();
+                openReader(bookId);
+            });
+        }
+        
+        // reset progress position in this book
+        const resetPosBtn = document.getElementById('resetProgressBtn');
+        if (resetPosBtn) {
+            resetPosBtn.addEventListener('click', () => {
+                progressMap[bookId] = 0;
+                saveProgress();
+                openReader(bookId);
+                alert('Reading position reset to beginning.');
+            });
+        }
+        
+        // Auto-save scroll position when user scrolls content + leave page? add listener for scroll to store offset proportion
+        const contentElem = document.getElementById('bookContentDisplay');
+        if (contentElem) {
+            const saveScrollPosition = () => {
+                if (!activeBookId) return;
+                const scrollTop = contentElem.scrollTop;
+                const maxScroll = contentElem.scrollHeight - contentElem.clientHeight;
+                if (maxScroll > 0) {
+                    const ratio = scrollTop / maxScroll;
+                    const fullLen = book.content ? book.content.length : 0;
+                    const offset = Math.floor(ratio * fullLen);
+                    progressMap[bookId] = offset;
+                    saveProgress();
+                }
+            };
+            contentElem.addEventListener('scroll', () => {
+                // debounce a little
+                if (window.scrollSaveTimeout) clearTimeout(window.scrollSaveTimeout);
+                window.scrollSaveTimeout = setTimeout(saveScrollPosition, 400);
+            });
+            // also save before unload
+            window.addEventListener('beforeunload', () => {
+                saveScrollPosition();
+            });
+        }
+    }
+
+    function addNewBook() {
+        const titleInput = document.getElementById('newBookTitle');
+        const authorInput = document.getElementById('newBookAuthor');
+        let title = titleInput.value.trim();
+        if (!title) {
+            alert('Please enter a book title');
+            return;
+        }
+        const author = authorInput.value.trim() || 'Added by reader';
+        const newId = 'book_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        const newBook = {
+            id: newId,
+            title: title,
+            author: author,
+            content: `✨ "${title}" — a book you added.\n\nWrite your own reflections or copy excerpts here. This is your personal reading space.\n\nYou can take notes, mark progress, and finish at your own pace.\n\nHappy reading! ✨`
+        };
+        books.push(newBook);
+        statusMap[newId] = 'reading';
+        notesMap[newId] = '';
+        progressMap[newId] = 0;
+        saveBooks();
+        saveStatus();
+        saveNotes();
+        saveProgress();
+        renderLibraryAndShelves();
+        titleInput.value = '';
+        authorInput.value = '';
+        openReader(newId);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    function resetDemoToDefault() {
+        if (confirm('⚠️ Reset all books, notes, progress to default? Your added books will be removed.')) {
+            books = [...defaultBooks];
+            notesMap = {};
+            progressMap = {};
+            statusMap = {};
+            defaultBooks.forEach(b => { statusMap[b.id] = 'reading'; });
+            saveBooks();
+            saveNotes();
+            saveProgress();
+            saveStatus();
+            renderLibraryAndShelves();
+            if (books.length > 0) openReader(books[0].id);
+            else {
+                document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;">✨ Library reset. Add a book to start.</div>';
+                activeBookId = null;
+            }
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        initData();
+        renderLibraryAndShelves();
+        if (books.length > 0) {
+            openReader(books[0].id);
+        } else {
+            document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;">📚 Your library is empty. Add your first book above ☝️</div>';
+        }
+        const addBtn = document.getElementById('addBookBtn');
+        if (addBtn) addBtn.addEventListener('click', addNewBook);
+        const resetLink = document.getElementById('resetDemoLink');
+        if (resetLink) resetLink.addEventListener('click', (e) => { e.preventDefault(); resetDemoToDefault(); });
+        
+        // also allow enter in new book fields
+        const titleField = document.getElementById('newBookTitle');
+        if (titleField) {
+            titleField.addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewBook(); });
+        }
+    });

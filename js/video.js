@@ -1,0 +1,238 @@
+  // ---------- VIDEO DATABASE (lessons with proper embedded iframe URLs)
+  // Each object: id, title, description, embedUrl (YouTube or compatible), keywords (for search)
+  const videoLibrary = [
+    {
+      id: 1,
+      title: "JavaScript Mastery: Fundamentals",
+      description: "Learn variables, functions, loops & modern ES6. Perfect for beginners.",
+      embedUrl: "https://www.youtube.com/embed/PkZNo7MFNFg?si=abc1",
+      keywords: ["javascript", "js", "programming", "fundamentals", "web development", "coding"]
+    },
+    {
+      id: 2,
+      title: "CSS Grid & Flexbox: Modern Layouts",
+      description: "Build responsive designs with CSS Grid and Flexbox in 20 mins.",
+      embedUrl: "https://www.youtube.com/embed/3YW65K6LcIA?si=def2",
+      keywords: ["css", "flexbox", "grid", "responsive", "design", "frontend"]
+    },
+    {
+      id: 3,
+      title: "Python for Data Science",
+      description: "Intro to Python, pandas, and data visualization basics.",
+      embedUrl: "https://www.youtube.com/embed/_uQrJ0TkZlc?si=ghi3",
+      keywords: ["python", "data science", "pandas", "analytics", "programming"]
+    },
+    {
+      id: 4,
+      title: "React Hooks Deep Dive",
+      description: "useState, useEffect, custom hooks — modern React patterns.",
+      embedUrl: "https://www.youtube.com/embed/Tn6-PIqc4UM?si=jkl4",
+      keywords: ["react", "hooks", "frontend", "javascript", "web dev"]
+    },
+    {
+      id: 5,
+      title: "HTML5 & Semantic Web",
+      description: "Master semantic HTML, accessibility, and modern markup.",
+      embedUrl: "https://www.youtube.com/embed/UB1O30fR-EE?si=mno5",
+      keywords: ["html", "semantic", "web", "accessibility", "beginner"]
+    },
+    {
+      id: 6,
+      title: "Node.js & Express Basics",
+      description: "Build REST APIs with Node.js and Express framework.",
+      embedUrl: "https://www.youtube.com/embed/Oe421EPjeBE?si=pqr6",
+      keywords: ["nodejs", "express", "backend", "api", "javascript"]
+    },
+    {
+      id: 7,
+      title: "Git & GitHub Workflow",
+      description: "Version control, branching, collaboration essential.",
+      embedUrl: "https://www.youtube.com/embed/RGOj5yH7evk?si=stu7",
+      keywords: ["git", "github", "version control", "collaboration", "devops"]
+    },
+    {
+      id: 8,
+      title: "UI Design Principles",
+      description: "Color theory, spacing, typography for stunning interfaces.",
+      embedUrl: "https://www.youtube.com/embed/lQmGKsu0VQQ?si=vwx8",
+      keywords: ["ui", "design", "ux", "figma", "creative"]
+    },
+    {
+      id: 9,
+      title: "TypeScript for Beginners",
+      description: "Strongly typed JavaScript, interfaces, types explained.",
+      embedUrl: "https://www.youtube.com/embed/d56mG7DezGs?si=yz9",
+      keywords: ["typescript", "javascript", "typed", "advanced", "web"]
+    },
+    {
+      id: 10,
+      title: "Web Performance Optimization",
+      description: "Lazy loading, caching, Core Web Vitals made easy.",
+      embedUrl: "https://www.youtube.com/embed/ahlT7EroCgY?si=abc10",
+      keywords: ["performance", "optimization", "web vitals", "fast", "frontend"]
+    }
+  ];
+
+  // Helper: extract YouTube video ID for placeholder thumbnails (we'll generate aesthetic thumbs based on title)
+  // But for simplicity and visual consistency, we'll show emoji / first letter inside placeholder div.
+  function getThumbnailEmoji(title) {
+    const lower = title.toLowerCase();
+    if (lower.includes('javascript')) return '📜';
+    if (lower.includes('css')) return '🎨';
+    if (lower.includes('python')) return '🐍';
+    if (lower.includes('react')) return '⚛️';
+    if (lower.includes('html')) return '🏷️';
+    if (lower.includes('node')) return '🚀';
+    if (lower.includes('git')) return '🐙';
+    if (lower.includes('design')) return '🎨';
+    if (lower.includes('typescript')) return '🔷';
+    if (lower.includes('performance')) return '⚡';
+    return '📹';
+  }
+
+  // current selected video object (default first video)
+  let currentVideo = videoLibrary[0];
+
+  // DOM elements
+  const mainIframe = document.getElementById('mainVideoFrame');
+  const currentVideoTitleSpan = document.getElementById('currentVideoTitle');
+  const currentVideoDescSpan = document.getElementById('currentVideoDesc');
+  const relatedContainer = document.getElementById('relatedListContainer');
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+
+  // Function to render related videos based on search query (string)
+  // If query is empty/null, show all videos except current playing one (but we actually show all except current, but we'll show relevant ordering)
+  // The requirement: "user may search the video he want and all which represent the other related video"
+  // So we filter videos by keyword match to search term, then display as related, and also optionally update main video to first result?
+  // But better UX: Search filters the related list; when user clicks on a related card, it becomes main video. And optionally if user searches, we also show matching videos in related area, and keep main video unchanged OR we could auto-set top result? To be intuitive, we update related panel based on search, and manually select from related.
+  function filterVideosBySearch(searchTerm) {
+    if (!searchTerm.trim()) {
+      // no search => return all videos
+      return [...videoLibrary];
+    }
+    const termLower = searchTerm.trim().toLowerCase();
+    return videoLibrary.filter(video =>
+      video.title.toLowerCase().includes(termLower) ||
+      video.description.toLowerCase().includes(termLower) ||
+      video.keywords.some(keyword => keyword.toLowerCase().includes(termLower))
+    );
+  }
+
+  // Render the related videos list based on given filtered list (or default full)
+  // Also we will exclude the currently playing video? it's better to keep related but we can highlight but not needed to exclude, but we can keep because "related" can have current but user will see it and click it again — but we may show all related except the active one to avoid confusion. Typical UX: not showing same as main.
+  // But since it's demo, we will filter out current video from related list to keep it fresh.
+  function renderRelatedList(videosArray) {
+    // remove current playing video from related list if exists to avoid duplication
+    const filteredRel = videosArray.filter(v => v.id !== currentVideo.id);
+    if (filteredRel.length === 0) {
+      relatedContainer.innerHTML = `<div class="no-results">✨ No other related videos found.<br>Try a different search! 🎯</div>`;
+      return;
+    }
+    relatedContainer.innerHTML = '';
+    filteredRel.forEach(video => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      // thumbnail area
+      const thumbDiv = document.createElement('div');
+      thumbDiv.className = 'thumbnail-placeholder';
+      const emoji = getThumbnailEmoji(video.title);
+      thumbDiv.innerHTML = `<span style="background: #1a3b47; font-size: 2rem;">${emoji}</span>`;
+      // info
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'card-info';
+      infoDiv.innerHTML = `
+        <h4>${escapeHtml(video.title)}</h4>
+        <p>⏱️ ${Math.floor(Math.random() * 15) + 5} min lesson · <span class="tag-badge">📌 related</span></p>
+      `;
+      card.appendChild(thumbDiv);
+      card.appendChild(infoDiv);
+      // click event: load into main player
+      card.addEventListener('click', () => {
+        setMainVideo(video);
+        // after updating main video, we need to re-render related list to avoid displaying the new current video in list
+        const currentSearchValue = searchInput.value;
+        const filteredByCurrentSearch = filterVideosBySearch(currentSearchValue);
+        renderRelatedList(filteredByCurrentSearch);
+      });
+      relatedContainer.appendChild(card);
+    });
+  }
+
+  // small helper to escape html
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
+
+  // set main video (update iframe, title, description)
+  function setMainVideo(videoObj) {
+    if (!videoObj) return;
+    currentVideo = videoObj;
+    // ensure embed URL may have autoplay param removed or keep as is for better UX we keep without autoplay by default, but we can optionally add modest
+    let finalUrl = videoObj.embedUrl;
+    // ensure that if URL doesn't have ? we add proper param to avoid autoplay noise, but keep same
+    if (finalUrl.includes('youtube.com/embed/')) {
+      // remove any existing autoplay param to keep it clean, but not required
+      if (!finalUrl.includes('?autoplay')) {
+        // keep original, but we can add &autoplay=0 for consistent
+        if (finalUrl.indexOf('?') === -1) finalUrl += '?autoplay=0';
+        else if (!finalUrl.includes('autoplay')) finalUrl += '&autoplay=0';
+      }
+    }
+    mainIframe.src = finalUrl;
+    currentVideoTitleSpan.innerText = videoObj.title;
+    currentVideoDescSpan.innerText = videoObj.description;
+  }
+
+  // handle search: get search term, filter videos, then render related based on that filter.
+  // Also, we optionally match the first result? but not needed; user will click any related. But we also want maybe "if user search, we don't change main video unless they click. That's perfect.
+  function performSearch() {
+    const query = searchInput.value;
+    const filtered = filterVideosBySearch(query);
+    if (filtered.length === 0) {
+      // no results: show empty related area, but keep main video untouched. Display message.
+      relatedContainer.innerHTML = `<div class="no-results">🔎 No lessons match "${escapeHtml(query)}".<br>Try: JavaScript, CSS, Python, Git</div>`;
+      return;
+    }
+    // But we also want that when searching, if current video is not in filtered list, we still show related list but maybe we also consider a suggestion? Not needed. render related from filtered (current video filtered out inside renderRelatedList)
+    renderRelatedList(filtered);
+    // optional: if the currently playing video is not in the filtered list? we could keep current playing - its fine.
+    // Additional nice feature: if the current video is NOT part of the filtered results, we can show a small notice? but out of scope.
+    // But for user convenience we can display small note in console? no needed
+    const containsCurrent = filtered.some(v => v.id === currentVideo.id);
+    if (!containsCurrent && filtered.length > 0) {
+      // we don't replace video automatically, just hint in description? we can show subtle tip but not necessary
+      const tip = document.createElement('div');
+      // avoid duplicate, but not needed. We'll show temporary notification style? we can update temporary style but not mandatory.
+    }
+  }
+
+  // initial load: show full related list (all videos except default current)
+  function initPage() {
+    // set default main video (first video)
+    setMainVideo(videoLibrary[0]);
+    // render related list of all videos except first one
+    const allExceptCurrent = videoLibrary.filter(v => v.id !== currentVideo.id);
+    renderRelatedList(allExceptCurrent);
+    // bind search event
+    searchBtn.addEventListener('click', () => {
+      performSearch();
+    });
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performSearch();
+      }
+    });
+    // extra: if clear search via empty string and want to reset, we can provide reset but user can clear input and press search gives full list
+    // Also when search is empty -> show full library
+  }
+
+  initPage();
