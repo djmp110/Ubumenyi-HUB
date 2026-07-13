@@ -258,7 +258,7 @@
         }
 
         .ecosystem-card {
-            flex: 1;
+            flex: 1 1 500px;
             width: auto;
             background: white;
             border-radius: 28px;
