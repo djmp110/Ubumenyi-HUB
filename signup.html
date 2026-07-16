@@ -4,116 +4,234 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Sign up</title>
-        <link rel="stylesheet" href="style.css">
         <style>
-                body {
-                background-color: aquamarine;
+            /* Reset and Base */
+            * {
+                box-sizing: border-box;
             }
-            
-            
-            /* Card container */
-.form-card {
-  background: #ffffff;          /* White background */
-  border-radius: 12px;          /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Soft shadow */
-  padding: 20px;                /* Inner spacing */
-  margin-left: 450px;                 /* Space around cards */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-align: center;
-  width: 400px;
-  height: 500px;
-  margin-top: 40px;
-}
+            body {
+                background-color: aquamarine;
+                margin: 0;
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
 
-/* Hover effect */
-.form-card:hover {
-  transform: translateY(-5px);  /* Slight lift */
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
+            /* --- Header Styles --- */
+            .main-header {
+                background: rgba(255, 255, 255, 0.8);
+                padding: 15px 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            .header-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .header-logo {
+                font-size: 1.2rem;
+                font-weight: bold;
+            }
+            .header-logo span {
+                font-weight: normal;
+            }
+            .header-tagline {
+                font-size: 0.8rem;
+                color: #333;
+                margin-top: 4px;
+            }
+            .nav-links a {
+                margin-left: 20px;
+                text-decoration: none;
+                color: #333;
+                font-weight: 500;
+            }
+            .nav-links a:hover {
+                text-decoration: underline;
+            }
 
-/* Card title */
-.form-card h3 {
-  margin-top: 0;
-  font-size: 1.4rem;
-  color: #333;
-}
+            /* --- Main Content Flexbox Layout --- */
+            .main-content {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 50px;
+                max-width: 1200px;
+                margin: 50px auto;
+                padding: 0 20px;
+                flex: 1; /* Pushes footer to bottom */
+            }
 
-/* Card content text */
-.card p {
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.5;
-}
+            /* Left Text Section */
+            .text-side {
+                flex: 1;
+                min-width: 250px;
+                padding-top: 10px;
+                max-width: 500px;
+            }
 
-/* Optional button inside card */
-.demo-note button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+            /* --- Signup Card --- */
+            .form-card {
+                background: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                padding: 30px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                width: 100%;
+                max-width: 450px;
+                margin: 0; /* REMOVED the 450px margin! */
+                height: auto; /* Let content define the height */
+            }
+            .form-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            }
+            .form-title h2 {
+                margin-top: 0;
+                text-align: center;
+                color: #333;
+            }
 
-.form-card button:hover {
-  background: #0056b3;
-}
-/* Style for form labels */
-label {
-  display: inline-block;   /* Allows width control */
-  width: 120px;            /* Fixed width for alignment */
-  margin-right: 10px;      /* Space between label and input */
-  text-align: right;       /* Align text to the right edge */
-  font-weight: bold;       /* Optional styling */
-}
+            /* --- Form Styles --- */
+            label {
+                display: inline-block;
+                width: 110px; /* Slight adjustment for the longer 'Confirm Password' label */
+                margin-right: 10px;
+                text-align: right;
+                font-weight: bold;
+                vertical-align: top; /* Keeps label aligned with top of input */
+            }
+            input {
+                padding: 8px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                width: calc(100% - 130px); /* Allows input to fill remaining space */
+            }
+            .btn-signup {
+                border-radius: 5px;
+                background-color: rgb(86, 232, 203);
+                border: none;
+                padding: 10px 20px;
+                font-weight: bold;
+                cursor: pointer;
+                display: block;
+                margin-top: 10px;
+                width: 100%;
+            }
+            .btn-signup:hover {
+                background-color: rgb(66, 212, 183);
+            }
+            .demo-note {
+                margin-top: 20px;
+                text-align: center;
+                font-size: 0.9rem;
+            }
 
-/* Style for inputs */
-input {
-  padding: 6px;
-  margin-bottom: 12px;     /* Space between rows */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.btn-signup {
-    background-color: rgb(86, 232, 203);
-}
+            /* --- Footer --- */
+            .footer {
+                background: rgba(255, 255, 255, 0.8);
+                padding: 20px;
+                text-align: center;
+                font-size: 0.8rem;
+                margin-top: auto;
+            }
+            .footer-text {
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.5;
+            }
 
-            
-
-
+            /* --- Mobile Responsiveness --- */
+            @media (max-width: 850px) {
+                .main-content {
+                    flex-direction: column; /* Stack top-to-bottom on mobile */
+                    align-items: center;
+                    gap: 30px;
+                }
+                .text-side {
+                    text-align: center;
+                    max-width: 100%;
+                }
+                .nav-links {
+                    margin-top: 10px;
+                }
+                .nav-links a {
+                    margin: 0 10px;
+                }
+                /* On mobile, make inputs and labels full width and stack them */
+                label {
+                    width: 100%;
+                    text-align: left;
+                    margin-bottom: 2px;
+                    display: block;
+                }
+                input {
+                    width: 100%;
+                    display: block;
+                }
+            }
         </style>
-
     </head>
     <body>
 
         <div class="main-header">
-    <div class="header-container">
-        <div>
-            <div class="header-logo">UBUMENYI<span> HUB</span></div>
-            <div class="header-tagline">"Ubumenyi" means Knowledge in Kinyarwanda · Smart Learning · Verifiable Skills · Online-First</div>
+            <div class="header-container">
+                <div>
+                    <div class="header-logo">UBUMENYI<span> HUB</span></div>
+                    <div class="header-tagline">"Ubumenyi" means Knowledge in Kinyarwanda · Smart Learning · Verifiable Skills · Online-First</div>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="signin.html">Account</a>
+                    <a href="about.html">About Us</a>
+                </div>
+            </div>
         </div>
-        <div class="nav-links">
-            <a href="index.html"> Home</a>
-            <a href="signin.html"> account</a>
-            <a href="about.html"> About Us</a>
+
+        <!-- New Flex container wrapping text and form -->
+        <div class="main-content">
+            
+            <!-- Left Text Side -->
+            <div class="text-side">
+                <h2>Start Your Learning Journey</h2>
+                <p>Create your UBUMENYI HUB account today. Get access to offline-first video lessons, blockchain-verified credentials, and an entire library of knowledge aligned with national standards.</p>
+            </div>
+
+            <!-- Right Side: The Signup Form -->
+            <div class="form-card">
+                <div class="form-title"><h2>New User Registration</h2></div>
+                <form action="#" method="post">
+                    <div>
+                        <label>Full name</label>
+                        <input type="text" name="signupName" placeholder="Jean Niyomugabo" required>
+                    </div>
+                    <div>
+                        <label>Email</label>
+                        <input type="email" name="signupEmail" placeholder="name@ubumenyi.rw" required>
+                    </div>
+                    <div>
+                        <label>Password</label>
+                        <input type="password" name="signupPassword" placeholder="Create a strong password" required>
+                    </div>
+                    <div>
+                        <label>Confirm Password</label>
+                        <input type="password" name="signupConfirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                    <input type="submit" value="Create account →" class="btn-signup">
+                </form>
+                <p class="demo-note">Already registered? <a href="signin.html">Sign in here</a></p>
+            </div>
         </div>
-    </div>
-</div>
-        <div class="form-card">
-  <div class="form-title"><h2 style="margin-bottom: 20px;">New User Registration</h2></div>
-  <form action="#" method="post" style="padding-top: 15px;">
-    <label>Full name</label>
-    <input type="text" name="signupName" placeholder="Jean Niyomugabo" required><br><br>
-    <label>Email</label>
-    <input type="email" name="signupEmail" placeholder="name@ubumenyi.rw" required><br><br>
-    <label>Password</label>
-    <input type="password" name="signupPassword" placeholder="Create a strong password" required><br><br>
-    <label>Confirm Password</label>
-    <input type="password" name="signupConfirmPassword" placeholder="Confirm your password" required><br><br>
-    <input type="submit" value="Create account →" class="btn-signup"><br><br>
-  </form>
-  <p class="demo-note">Already registered? <a href="signin.html">Sign in here</a></p>
-</div>
+
+        <!-- Added Footer for consistency -->
+        <div class="footer">
+            <div class="footer-text">© 2025 UBUMENYI HUB — Knowledge for All | Offline‑first video, books, online credentials | Aligned with RDB, MINICT & RIA Standards · Blockchain‑backed certifications · Ubumenyi ni Ubusenge (Knowledge is Light)</div>
+        </div>
 
     </body>
+</html>
