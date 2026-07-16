@@ -57,7 +57,7 @@
                 <div class="card-header"><h2><i class="fas fa-trophy"></i> Platform Insights</h2></div>
                 <div style="padding: 22px 28px;">
                     <p style="font-size: 1rem;">🏆 <strong>Most popular content:</strong> ${topChapter ? `${topChapter.title} (${topChapter.viewCount} views)` : 'N/A'}</p>
-                    <p>👩‍🏫 Teachers: ${platformUsers.filter(u=>u.role==='Teacher').length} | 🧑‍🎓 Students: ${platformUsers.filter(u=>u.role==='Student').length}</p>
+                    <p>Teachers: ${platformUsers.filter(u=>u.role==='Teacher').length} |  Students: ${platformUsers.filter(u=>u.role==='Student').length}</p>
                     <hr style="margin: 16px 0; border-color:#e0ebe5;">
                     <p><i class="fas fa-chalkboard"></i> Ubumenyi Hub combines video lessons, digital books & online classes. Manage all chapters below.</p>
                 </div>
@@ -145,7 +145,7 @@
                     </table>
                 </div>
                 <div style="padding: 16px 24px; border-top:1px solid #e0ebe5;">
-                    📊 Teachers: ${platformUsers.filter(u=>u.role==='Teacher').length} | Students: ${platformUsers.filter(u=>u.role==='Student').length}
+                    Teachers: ${platformUsers.filter(u=>u.role==='Teacher').length} | Students: ${platformUsers.filter(u=>u.role==='Student').length}
                 </div>
             </div>
             <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Return to Platform Home</a>
@@ -219,7 +219,7 @@
                 chapters.push(newChapter);
                 closeModal();
                 renderAdminView();
-                alert(`✅ New ${type === 'video' ? 'Video Lesson' : 'Digital Book'} added: "${title}"`);
+                alert(` New ${type === 'video' ? 'Video Lesson' : 'Digital Book'} added: "${title}"`);
             });
         }
     }

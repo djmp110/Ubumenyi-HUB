@@ -1,8 +1,8 @@
 // ---------- FORUM DATA (teachers & students interaction) ----------
     let forumTopics = [
-        { id: 1, title: "📘 Doubt about quiz question #3 (Data Structures)", author: "Student_Aline", replies: 3, time: "2h ago", tags: "quiz-help" },
-        { id: 2, title: "💡 Resource: Best practices for grading assignments", author: "Teacher_James", replies: 5, time: "5h ago", tags: "teacher-discussion" },
-        { id: 3, title: "🧪 Can we have more role-specific coding challenges?", author: "Student_Elvis", replies: 2, time: "yesterday", tags: "feedback" }
+        { id: 1, title: " Doubt about quiz question #3 (Data Structures)", author: "Student_Aline", replies: 3, time: "2h ago", tags: "quiz-help" },
+        { id: 2, title: " Resource: Best practices for grading assignments", author: "Teacher_James", replies: 5, time: "5h ago", tags: "teacher-discussion" },
+        { id: 3, title: " Can we have more role-specific coding challenges?", author: "Student_Elvis", replies: 2, time: "yesterday", tags: "feedback" }
     ];
 
     function renderForum() {
@@ -30,7 +30,7 @@
         document.querySelectorAll('.reply-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const topicId = btn.getAttribute('data-id');
-                alert(`💬 Reply feature: teachers & students can discuss! You replied to topic ID ${topicId}. (Simulated: real forum threads will appear here.)`);
+                alert(` Reply feature: teachers & students can discuss! You replied to topic ID ${topicId}. (Simulated: real forum threads will appear here.)`);
             });
         });
     }
@@ -54,7 +54,7 @@
         forumTopics.unshift(newTopic);
         renderForum();
         inputEl.value = '';
-        alert("✅ New discussion posted! Teachers & students can now reply.");
+        alert(" New discussion posted! Teachers & students can now reply.");
     });
 
     // ---------- ROLE-SPECIFIC QUIZ DATA (teacher vs student) ----------
@@ -105,7 +105,7 @@
                          </label>`;
             });
         });
-        html += `<button class="submit-quiz" id="submitQuizBtn">✅ Submit ${quizData.roleName} Quiz</button>
+        html += `<button class="submit-quiz" id="submitQuizBtn"> Submit ${quizData.roleName} Quiz</button>
                  <div id="quizFeedbackMsg" class="quiz-feedback"></div></div>`;
         container.innerHTML = html;
 
@@ -189,7 +189,7 @@
     setInterval(() => {
         const bannerText = document.querySelector('#liveBanner h3');
         if (bannerText && Math.random() > 0.6) {
-            const sessions = ['🔴 LIVE: "Frontend Frameworks" with Ms. Diane', '🔴 LIVE: "Discussion Forum Q&A marathon"', '🔴 LIVE: "Role-quiz workshop: Students vs Teachers"'];
+            const sessions = [' LIVE: "Frontend Frameworks" with Ms. Diane', ' LIVE: "Discussion Forum Q&A marathon"', ' LIVE: "Role-quiz workshop: Students vs Teachers"'];
             const randomSession = sessions[Math.floor(Math.random() * sessions.length)];
             bannerText.innerHTML = `<i class="fas fa-video"></i> ${randomSession}`;
         }

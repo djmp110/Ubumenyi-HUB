@@ -8,7 +8,7 @@
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const text = link.innerText.trim();
-                    alert(`🔗 ${text}\nThis feature will be available soon on Ubumenyi Hub. Stay tuned for full integration of Alison-style resources.\n\n📚 Our platform offers video lessons, digital books, and live classes.`);
+                    
                 });
             } else {
                 // if href has a real url, just let it navigate, but we also add a small attribute for external?
