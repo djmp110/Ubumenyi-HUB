@@ -3,23 +3,23 @@
   const videoLibrary = [
     {
       id: 1,
-      title: "html tutorial for beginners",
+      title: "JavaScript Mastery: Fundamentals",
       description: "Learn variables, functions, loops & modern ES6. Perfect for beginners.",
-      embedUrl: "/videolesson/HTML Tutorial for Beginners.mp4.mp4",
+      embedUrl: "https://www.youtube.com/embed/PkZNo7MFNFg?si=abc1",
       keywords: ["javascript", "js", "programming", "fundamentals", "web development", "coding"]
     },
     {
       id: 2,
-      title: "Python for beginners",
+      title: "CSS Grid & Flexbox: Modern Layouts",
       description: "Build responsive designs with CSS Grid and Flexbox in 20 mins.",
-      embedUrl: "/videolesson/Learn Python in Less than 10 Minutes for Beginners (Fast & Easy).mp4",
+      embedUrl: "https://www.youtube.com/embed/3YW65K6LcIA?si=def2",
       keywords: ["css", "flexbox", "grid", "responsive", "design", "frontend"]
     },
     {
       id: 3,
-      title: "BIG BANG THOERY",
+      title: "Python for Data Science",
       description: "Intro to Python, pandas, and data visualization basics.",
-      embedUrl: "/videolesson/How Did _Nothing_ Exist Before the Big Bang_.mp4",
+      embedUrl: "https://www.youtube.com/embed/_uQrJ0TkZlc?si=ghi3",
       keywords: ["python", "data science", "pandas", "analytics", "programming"]
     },
     {
