@@ -72,19 +72,19 @@
         container.innerHTML = '';
         books.forEach(book => {
             const status = statusMap[book.id] || 'reading';
-            const statusText = status === 'reading' ? '📖 Reading' : '✅ Finished';
+            const statusText = status === 'reading' ? 'Reading' : ' Finished';
             const statusClass = status === 'reading' ? 'status-reading' : 'status-finished';
             const div = document.createElement('div');
             div.className = 'book-item';
             div.setAttribute('data-id', book.id);
             div.innerHTML = `
                 <div style="flex:1">
-                    <div class="book-info">📕 ${escapeHtml(book.title)}</div>
+                    <div class="book-info"> ${escapeHtml(book.title)}</div>
                     <div class="book-author">${escapeHtml(book.author || 'unknown author')}</div>
                 </div>
                 <div>
                     <span class="book-status ${statusClass}">${statusText}</span>
-                    <button class="btn-sm" data-toggle-status="${book.id}" title="mark as finished/reading">🔄</button>
+                    <button class="btn-sm" data-toggle-status="${book.id}" title="mark as finished/reading"></button>
                 </div>
             `;
             div.addEventListener('click', (e) => {
@@ -105,8 +105,8 @@
         const readingBooks = books.filter(b => (statusMap[b.id] || 'reading') === 'reading');
         const finishedBooks = books.filter(b => (statusMap[b.id]) === 'finished');
         
-        const readingHtml = `<div style="margin-bottom: 1rem;"><strong>📚 Currently reading (${readingBooks.length})</strong><div style="margin-top: 8px;">${readingBooks.map(b => `<div style="background:#fff1e0; border-radius:16px; padding:8px 12px; margin-bottom:6px;">📘 ${escapeHtml(b.title)} <span style="font-size:12px;">${escapeHtml(b.author)}</span></div>`).join('') || '<i style="color:#8e9e97;">— no active books —</i>'}</div></div>`;
-        const finishedHtml = `<div><strong>✅ Finished (${finishedBooks.length})</strong><div style="margin-top: 8px;">${finishedBooks.map(b => `<div style="background:#e3f0ea; border-radius:16px; padding:8px 12px; margin-bottom:6px;">🏁 ${escapeHtml(b.title)}</div>`).join('') || '<i style="color:#8e9e97;">— none yet —</i>'}</div></div>`;
+        const readingHtml = `<div style="margin-bottom: 1rem;"><strong> Currently reading (${readingBooks.length})</strong><div style="margin-top: 8px;">${readingBooks.map(b => `<div style="background:#fff1e0; border-radius:16px; padding:8px 12px; margin-bottom:6px;">${escapeHtml(b.title)} <span style="font-size:12px;">${escapeHtml(b.author)}</span></div>`).join('') || '<i style="color:#8e9e97;">— no active books —</i>'}</div></div>`;
+        const finishedHtml = `<div><strong> Finished (${finishedBooks.length})</strong><div style="margin-top: 8px;">${finishedBooks.map(b => `<div style="background:#e3f0ea; border-radius:16px; padding:8px 12px; margin-bottom:6px;"> ${escapeHtml(b.title)}</div>`).join('') || '<i style="color:#8e9e97;">— none yet —</i>'}</div></div>`;
         shelfDiv.innerHTML = readingHtml + finishedHtml;
     }
 
@@ -137,23 +137,23 @@
         
         // display reader area
         const readerPanel = document.getElementById('readerPanel');
-        const statusText = statusMap[bookId] === 'finished' ? '✅ Finished' : '📖 Reading in progress';
+        const statusText = statusMap[bookId] === 'finished' ? ' Finished' : ' Reading in progress';
         readerPanel.innerHTML = `
             <div class="book-title-large">${escapeHtml(book.title)}</div>
             <div style="color:#5b6e66; margin-bottom: 0.8rem;">${escapeHtml(book.author || 'Anonymous')} · ${statusText}</div>
-            <div class="progress-badge">📌 Last read position saved (auto)</div>
+            <div class="progress-badge"> Last read position saved (auto)</div>
             <div id="bookContentDisplay" class="book-content" style="white-space: pre-wrap;">${escapeHtml(fullContent)}</div>
             <div class="notes-section">
                 <div class="notes-label">
-                    ✍️ Personal Notes & Important Lessons
+                     Personal Notes & Important Lessons
                     <span style="font-size:12px;">(auto-save when you click save)</span>
                 </div>
                 <textarea id="bookNotesArea" class="notes-textarea" rows="5" placeholder="Write down key insights, questions, or memorable quotes...">${escapeHtml(savedNote)}</textarea>
-                <button id="saveNotesBtn" class="save-note-btn">💾 Save Notes for this Book</button>
+                <button id="saveNotesBtn" class="save-note-btn"> Save Notes for this Book</button>
                 <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items:center;">
                     <div>
-                        <button id="markReadingBtn" class="btn-action">📖 Mark as Reading</button>
-                        <button id="markFinishedBtn" class="btn-action">🏆 Mark as Finished</button>
+                        <button id="markReadingBtn" class="btn-action"> Mark as Reading</button>
+                        <button id="markFinishedBtn" class="btn-action"> Mark as Finished</button>
                     </div>
                     <button id="resetProgressBtn" style="background:#f1ded0;">↺ Reset reading position</button>
                 </div>
@@ -301,7 +301,7 @@
             renderLibraryAndShelves();
             if (books.length > 0) openReader(books[0].id);
             else {
-                document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;">✨ Library reset. Add a book to start.</div>';
+                document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;"> Library reset. Add a book to start.</div>';
                 activeBookId = null;
             }
         }
@@ -314,7 +314,7 @@
         if (books.length > 0) {
             openReader(books[0].id);
         } else {
-            document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;">📚 Your library is empty. Add your first book above ☝️</div>';
+            document.getElementById('readerPanel').innerHTML = '<div style="padding:2rem; text-align:center;"> Your library is empty. Add your first book above ☝️</div>';
         }
         const addBtn = document.getElementById('addBookBtn');
         if (addBtn) addBtn.addEventListener('click', addNewBook);
